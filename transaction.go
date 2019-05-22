@@ -1,6 +1,9 @@
 package sagepay
 
-import "context"
+import (
+	"context"
+	"net/http"
+)
 
 // TransactionType represents a valid transaction type
 type TransactionType string
@@ -40,7 +43,7 @@ type TransactionRequest struct {
 	Description   string               `json:"description"`
 	Reference     string               `json:"vendorTxCode"`
 
-	EntryMethod       string      `json:"entryMethod"`
+	EntryMethod       string      `json:"entryMethod,omitempty"`
 	ApplyThreeDSecure ThreeDSMode `json:"apply3dSecure"`
 
 	CustomerFirstName string `json:"customerFirstName"`
@@ -85,12 +88,25 @@ type TransactionResponse struct {
 
 	Currency string `json:"currency"`
 
-	ThreeDSecure struct {
+	ThreeDSecure *struct {
 		Status string `json:"status"`
 	} `json:"3DSecure"`
+
+	// 3DS Data
+	AcsURL string `json:"acsUrl,omitempty"`
+	PAReq  string `json:"paReq,omitempty"`
 }
 
-// TODO: Create transaction.
+// CreateTransaction will create a transaction with the given TransactionRequest
 func (c Client) CreateTransaction(ctx context.Context, transaction *TransactionRequest) (*TransactionResponse, error) {
-	return nil, nil
+
+	path := "/transactions"
+
+	res := TransactionResponse{}
+
+	if err := c.JSON(ctx, http.MethodPost, path, transaction, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

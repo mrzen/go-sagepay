@@ -17,9 +17,12 @@ import (
 
 // Client represents a SagePay API client instance
 type Client struct {
-	// HTTP Client
+	// HTTP Client - This can be overridden to change the
+	// HTTP transport behaviour.
 	HTTP *http.Client
 
+	// A writer which will be used to write out raw requests
+	// for diganostics.
 	DebugWriter io.Writer
 
 	provider            CredentialsProvider
@@ -36,7 +39,7 @@ const (
 	ProductionHost = "https://pi-live.sagepay.com/api/v1"
 )
 
-// New creates a new Sagepay API Client
+// New creates a new Sagepay API Client with the given CredentialsProvider
 func New(ctx context.Context, credentials CredentialsProvider) *Client {
 	hc := &http.Client{
 		Transport: http.DefaultTransport,
@@ -64,6 +67,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	req.SetBasicAuth(credentials.Username, credentials.Password)
 
+	// If a DebugWriter is given and the API is in test mode
+	// Write out the raw HTTP Request to the given writer.
+	//
+	// * Note: This feature is available only in test mode
+	//  	   to prevent accidental leakage of sensitive data
+	//		   within these logs.
 	if c.testMode && c.DebugWriter != nil {
 		if req.Body != nil {
 			fmt.Fprintln(c.DebugWriter, "--------- REQUEST --------")
@@ -98,6 +107,7 @@ func (c *Client) JSON(ctx context.Context, method, path string, body, into inter
 
 	req, err := http.NewRequest(method, c.getEndpoint()+path, bytes.NewReader(buffer.Bytes()))
 
+	// Content-Type and Accept headers must be set for Sage to recognize the input.
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
@@ -113,23 +123,29 @@ func (c *Client) JSON(ctx context.Context, method, path string, body, into inter
 
 	defer res.Body.Close()
 
+	// If we get an error response
+	// attempt to decode the response body as an error document
+	// and return that as an error.
 	if res.StatusCode >= 400 {
 		errorBody := ErrorResponse{}
 
 		cb := new(bytes.Buffer)
 		tr := io.TeeReader(res.Body, cb)
 
+		// If we can’t decode the body, or the body doesn't appear to
+		// contain a list of errors, then return the response body itself
+		// as an error.
 		if err := json.NewDecoder(tr).Decode(&errorBody); err != nil {
 			return err
-		}
-
-		if len(errorBody.Errors) == 0 {
+		} else if len(errorBody.Errors) == 0 {
 			return errors.New(cb.String())
 		}
 
 		return errorBody
 	}
 
+	// Decode the response into the given `into` object,
+	// returning any error encountered.
 	return json.NewDecoder(res.Body).Decode(&into)
 }
 

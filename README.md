@@ -19,11 +19,11 @@ Examples
 1. Get a merchant session key
 
 ````go
-import "github.com/mrzen/sagepay"
+import "github.com/mrzen/go-sagepay"
 
 func GetSessionKey(ctx context.Context) (*sagepay.SessionKey, error) {
     // Gets credentials from `SAGE_USERNAME` and `SAGE_PASSWORD` env
     sage := sagepay.New(ctx, sagepay.EnvironmentCredentialsProvider{})
-    return sage.GetSessionKey(ctx)
+    return sage.GetSessionKey(ctx, "myVendorName")
 }
 ````

@@ -7,7 +7,7 @@ import (
 
 // Error represents an error from the sage API
 type Error struct {
-	Code        string `json:"code"`
+	Code        int    `json:"code"`
 	Property    string `json:"property"`
 	Description string `json:"description"`
 	UserMessage string `json:"clientMessage"`
@@ -29,5 +29,5 @@ func (e ErrorResponse) Error() string {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("Error(%s): %s (%s)", e.Code, e.UserMessage, e.Description)
+	return fmt.Sprintf("Error(%d): %s (%s, %s)", e.Code, e.UserMessage, e.Property, e.Description)
 }
