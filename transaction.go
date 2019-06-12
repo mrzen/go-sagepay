@@ -92,6 +92,12 @@ type TransactionResponse struct {
 		Status string `json:"status"`
 	} `json:"3DSecure"`
 
+	Amount struct {
+		Total         int64 `json:"totalAmount"`
+		Sale          int64 `json:"saleAmount"`
+		ServiceCharge int64 `json:"surchargeAmount"`
+	}
+
 	// 3DS Data
 	AcsURL string `json:"acsUrl,omitempty"`
 	PAReq  string `json:"paReq,omitempty"`
