@@ -36,12 +36,12 @@ const (
 
 // TransactionRequest represents the request data for creating a transaction
 type TransactionRequest struct {
-	Type          TransactionType      `json:"transactionType"`
-	PaymentMethod RequestPaymentMethod `json:"paymentMethod"`
-	Amount        int64                `json:"amount"`
-	Currency      string               `json:"currency"`
-	Description   string               `json:"description"`
-	Reference     string               `json:"vendorTxCode"`
+	Type          TransactionType `json:"transactionType"`
+	PaymentMethod PaymentMethod   `json:"paymentMethod"`
+	Amount        int64           `json:"amount"`
+	Currency      string          `json:"currency"`
+	Description   string          `json:"description"`
+	Reference     string          `json:"vendorTxCode"`
 
 	EntryMethod       string      `json:"entryMethod,omitempty"`
 	ApplyThreeDSecure ThreeDSMode `json:"apply3dSecure"`
@@ -54,8 +54,8 @@ type TransactionRequest struct {
 	BillingAddress `json:"billingAddress"`
 }
 
-// RequestPaymentMethod represents a payment method
-type RequestPaymentMethod struct {
+// PaymentMethod represents a payment method
+type PaymentMethod struct {
 	Card struct {
 		SessionKey string `json:"merchantSessionKey"`
 		Identifier string `json:"cardIdentifier"`
@@ -84,9 +84,9 @@ type TransactionResponse struct {
 	ResponseCode string `json:"bankResponseCode"`
 	AuthCode     string `json:"bankAuthCode"`
 
-	Status string `json:"status"`
-
-	Currency string `json:"currency"`
+	Status   string        `json:"status"`
+	Currency string        `json:"currency"`
+	Method   PaymentMethod `json:"paymentMethod"`
 
 	ThreeDSecure *struct {
 		Status string `json:"status"`
