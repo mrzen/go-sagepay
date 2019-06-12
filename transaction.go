@@ -110,3 +110,16 @@ func (c Client) CreateTransaction(ctx context.Context, transaction *TransactionR
 
 	return &res, nil
 }
+
+// GetTransaction gets a single transaction by ID
+func (c *Client) GetTransaction(ctx context.Context, transactionID string) (*TransactionResponse, error) {
+	path := "/transactions/" + transactionID
+
+	res := TransactionResponse{}
+
+	if err := c.JSON(ctx, http.MethodGet, path, nil, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
